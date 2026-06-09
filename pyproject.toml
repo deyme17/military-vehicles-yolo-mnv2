@@ -1,8 +1,13 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "military-vehicles-computer-vision"
 version = "0.1.0"
 description = "Computer Vision pipeline for military vehicle detection (YOLO) and classification (MobileNet)."
-requires-python = ">=3.13"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
 
 dependencies = [
     "colorama>=0.4.6",
@@ -13,11 +18,20 @@ dependencies = [
     "pandas>=2.2.0",
     "scikit-learn>=1.4.0",
     "opencv-python>=4.10.0",
-    "torch>=2.2.0+cu121",
-    "torchvision>=0.17.0+cu121",
+    "torch==2.2.0+cu121",
+    "torchvision==0.17.0+cu121",
 ]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "wandb>=0.16.0",
 ]
+
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cuda" }
+torchvision = { index = "pytorch-cuda" }
