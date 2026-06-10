@@ -136,7 +136,8 @@ def evaluate_on_test(model: keras.Model,
     cm_norm = cm.astype("float") / cm.sum(axis=1, keepdims=True)
     cm_df = pd.DataFrame(cm_norm, index=class_names, columns=class_names)
     cm_df.insert(0, "Class", class_names)
-
+    cm_df = cm_df.reset_index(drop=True)
+    
     # classification report
     report = classification_report(labels, preds, target_names=class_names, output_dict=True, zero_division=0)
     report_df = pd.DataFrame(report).T.reset_index().rename(columns={"index": "Class"})
@@ -166,6 +167,7 @@ class ConfusionMatrixCallback(Callback):
         cm_norm = cm.astype("float") / cm.sum(axis=1, keepdims=True)
         cm_df = pd.DataFrame(cm_norm, index=self.class_names, columns=self.class_names)
         cm_df.insert(0, "Class", self.class_names)
+        cm_df = cm_df.reset_index(drop=True)
 
         wandb.log({f"epoch_{epoch}_confusion_matrix": wandb.Table(dataframe=cm_df)})
 
