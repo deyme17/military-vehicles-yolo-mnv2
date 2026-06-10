@@ -3,6 +3,8 @@ from pathlib import Path
 import argparse
 from tqdm import tqdm
 
+
+
 class CocoToYolo:
     def __init__(self, coco: Path, out: Path):
         self.out = out
@@ -176,6 +178,8 @@ class CocoToYolo:
                 name = cat.get("name")
                 f.write(f"{idx} - {name}\n")
 
+
+
 def rec_mkdir(out: Path) -> None:
     """
     Recursively creates directories for a specified path
@@ -188,6 +192,9 @@ def rec_mkdir(out: Path) -> None:
         rec_mkdir(par)
     out.mkdir()
 
+
+
+# main section
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="coco to YOLOv11 converter")
 
@@ -224,5 +231,3 @@ if __name__ == "__main__":
 
     converter.convert()
     converter.create_classes()
-
-
