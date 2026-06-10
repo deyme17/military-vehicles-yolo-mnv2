@@ -6,8 +6,9 @@ from tqdm import tqdm
 
 
 class CocoToYolo:
-    def __init__(self, coco: Path, out: Path):
+    def __init__(self, coco: Path, out: Path, cls: Path):
         self.out = out
+        self.cls = cls
         self.data = self.__coco_verify(coco)
 
     def __coco_verify(self, coco: Path) -> dict:
@@ -159,7 +160,7 @@ class CocoToYolo:
             yolo_str = ' '.join(yolo_coord)
             yolo_name = '.'.join(img_name.split('.')[:-1]) + ".txt"
 
-            with open(out.joinpath(yolo_name), 'a', encoding="UTF-8") as f:
+            with open(self.out.joinpath(yolo_name), 'a', encoding="UTF-8") as f:
                 f.write(f"{cat_id} {yolo_str}\n")
                 
     
@@ -170,7 +171,7 @@ class CocoToYolo:
         cats = self.data.get("categories")
         cats_map = self.__get_categories()
 
-        with open(out.joinpath("classes.txt"), 'w', encoding="UTF-8") as f:
+        with open(self.cls.joinpath("classes.txt"), 'w', encoding="UTF-8") as f:
             for cat in cats:
                 if cat.get("supercategory") == "none":
                     continue
@@ -180,17 +181,17 @@ class CocoToYolo:
 
 
 
-def rec_mkdir(out: Path) -> None:
+def rec_mkdir(d: Path) -> None:
     """
     Recursively creates directories for a specified path
 
     Args:
-        out (Path): output path
+        d (Path): directory path
     """
-    par = out.parent
+    par = d.parent
     if not par.exists():
         rec_mkdir(par)
-    out.mkdir()
+    d.mkdir()
 
 
 
@@ -200,6 +201,8 @@ if __name__ == "__main__":
 
     parser.add_argument("-f", "--file", type=str, help="Path to coco file")
     parser.add_argument("-o", "--output", type=str, help="Output directory for YOLO files")
+    parser.add_argument("-c", "--classes", type=str, default=None, 
+                        help="Output directory for classes.txt (-o is used if not defined)")
 
     args = parser.parse_args()
     
@@ -208,6 +211,7 @@ if __name__ == "__main__":
 
     coco = Path(args.file)
     out = Path(args.output)
+    cls = Path(args.classes) if args.classes else out
     
     if coco.is_file():
         ext = (coco.name).split('.')[-1]
@@ -216,18 +220,19 @@ if __name__ == "__main__":
     else:
         raise FileNotFoundError(f"{str(coco)} is not a file")
 
-    if out.exists():
-        if not out.is_dir():
-            raise NotADirectoryError(f"Path: {out} is not a directory")
-    else:
-        if input(f"Path {out} doesn't exists, do you want to create this directories? (y/n)\n") != 'y':
-            exit(1)
-        try:
-            out.mkdir()
-        except FileNotFoundError:
-            rec_mkdir(out)
+    for d in (out, cls):
+        if d.exists():
+            if not d.is_dir():
+                raise NotADirectoryError(f"Path: {d} is not a directory")
+        else:
+            if input(f"Path {d} doesn't exists, do you want to create this directories? (y/n)\n") != 'y':
+                exit(1)
+            try:
+                d.mkdir()
+            except FileNotFoundError:
+                rec_mkdir(d)
     
-    converter = CocoToYolo(coco, out)
+    converter = CocoToYolo(coco, out, cls)
 
     converter.convert()
     converter.create_classes()
