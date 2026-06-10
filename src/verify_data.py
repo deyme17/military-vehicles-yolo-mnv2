@@ -1,5 +1,3 @@
-# .\src\verify_data.py --yolo-dir .\data\ --crops-dir .\cropped\
-
 import argparse
 import random
 from pathlib import Path
@@ -9,8 +7,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
 
+
 def color_for_class(class_id):
     return PALETTE_RGB[class_id % len(PALETTE_RGB)]
+
 
 def load_classes(classes_file):
     classes = {}
@@ -156,12 +156,12 @@ def verify_crops():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--yolo-dir", type=Path, default=Path("yolo_dataset"))
-    parser.add_argument("--crops-dir", type=Path, default=Path("crops_dataset"))
+    parser.add_argument("--yolo-dir", type=str, default="yolo_dataset")
+    parser.add_argument("--crops-dir", type=str, default="crops_dataset")
     args = parser.parse_args()
 
-    YOLO_DIR = args.yolo_dir
-    CROPS_DIR = args.crops_dir
+    YOLO_DIR = Path(args.yolo_dir)
+    CROPS_DIR = Path(args.crops_dir)
     
     if not YOLO_DIR.exists():
         print(f"Directory: {YOLO_DIR} not found.")
