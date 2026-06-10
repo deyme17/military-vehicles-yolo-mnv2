@@ -4,6 +4,10 @@
 *.pt
 *.h5
 
+# ignore logs
+runs/
+wandb/
+
 # ignore yolo labels
 data/labels/
 
