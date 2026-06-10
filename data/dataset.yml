@@ -1,0 +1,15 @@
+path: ./data 
+
+train: images/train
+val: images/valid
+test: images/test
+
+nc: 6
+
+names:
+  0: APC-IFV
+  1: ART
+  2: CAR
+  3: MLRS
+  4: TANK
+  5: TRUCK
