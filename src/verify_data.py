@@ -77,19 +77,18 @@ def verify_yolo():
     labels_dir = YOLO_DIR / "labels"
     classes_file = YOLO_DIR / "classes.txt"
 
-    if not images_dir.exists():
-        for sub in ["train", "val", "test"]:
-            if (YOLO_DIR / "images" / sub).exists():
-                images_dir = YOLO_DIR / "images" / sub
-                labels_dir = YOLO_DIR / "labels" / sub
-                break
-
+    split_dirs = [sub for sub in ["train", "valid", "test"] if (images_dir / sub).exists()]
+    if split_dirs and not any(images_dir.glob("*.jpg")) and not any(images_dir.glob("*.png")):
+        images_dir = images_dir
+        labels_dir = YOLO_DIR / "labels"
+ 
     classes = load_classes(classes_file)
     all_images = find_image_files(images_dir)
 
     labeled = []
     for img in all_images:
-        label_path = labels_dir / (img.stem + ".txt")
+        rel = img.relative_to(images_dir)
+        label_path = labels_dir / rel.parent / (img.stem + ".txt")
         if label_path.exists():
             labeled.append((img, label_path))
 
@@ -122,12 +121,19 @@ def verify_yolo():
 def verify_crops():
     exts = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
     all_crops = []
-    for class_dir in sorted(CROPS_DIR.iterdir()):
-        if class_dir.is_dir():
-            for img_path in class_dir.iterdir():
-                if img_path.suffix.lower() in exts:
-                    all_crops.append((img_path, class_dir.name))
-
+    
+    top_dirs = sorted(CROPS_DIR.iterdir())
+    split_names = {"train", "valid", "test"}
+    if all(d.name in split_names for d in top_dirs if d.is_dir()):
+        class_dirs = [d for split in top_dirs if split.is_dir() for d in sorted(split.iterdir()) if d.is_dir()]
+    else:
+        class_dirs = [d for d in top_dirs if d.is_dir()]
+    
+    for class_dir in class_dirs:
+        for img_path in class_dir.iterdir():
+            if img_path.suffix.lower() in exts:
+                all_crops.append((img_path, class_dir.name))
+ 
     sample = random.sample(all_crops, min(N, len(all_crops)))
 
     fig, axes = plt.subplots(1, len(sample), figsize=(4 * len(sample), 4))
@@ -158,6 +164,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--yolo-dir", type=str, default="yolo_dataset")
     parser.add_argument("--crops-dir", type=str, default="crops_dataset")
+    parser.add_argument("--n", type=int, default=5, help="Number of samples to display")
     args = parser.parse_args()
 
     YOLO_DIR = Path(args.yolo_dir)
@@ -171,7 +178,7 @@ if __name__ == "__main__":
         print(f"Directory: {CROPS_DIR} not found.")
         exit(1)
     
-    N = 5
+    N = args.n
 
     PALETTE_RGB = [
         (0.93, 0.17, 0.17),
