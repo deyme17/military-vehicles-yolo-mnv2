@@ -4,10 +4,8 @@
 *.pt
 *.h5
 
-# ignore yolo data labels
-data/yolo/test/
-data/yolo/train/
-data/yolo/valid/
+# ignore yolo labels
+data/labels/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
