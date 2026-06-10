@@ -4,6 +4,11 @@
 *.pt
 *.h5
 
+# ignore yolo data labels
+data/yolo/test/
+data/yolo/train/
+data/yolo/valid/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
